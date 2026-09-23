@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>詭野西部第三季角色殘酷二選一</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1b120a;
+    --left:#a8531e;
+    --right:#d3971f;
+    --ink:#f3e3c3;
+    --muted:#ab8a63;
+    --line:rgba(243,227,195,.16);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans TC',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    overflow-x:hidden;
+  }
+  h1,h2,.serif{font-family:'Noto Serif TC',serif;}
+
+  .screen{min-height:100vh;min-height:100dvh;display:none;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  /* ---- 開場 ---- */
+  #start{align-items:center;justify-content:center;text-align:center;padding:8vh 6vw;gap:26px;}
+  #start .crack{font-size:clamp(13px,1.6vw,15px);color:var(--muted);letter-spacing:.04em;}
+  #start h1{
+    font-size:clamp(34px,7vw,60px);line-height:1.2;font-weight:900;margin:0;
+    background:linear-gradient(90deg,var(--left),var(--right));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  #start p{max-width:520px;color:var(--muted);font-size:15px;line-height:1.85;margin:0;}
+  .btn{
+    appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink);
+    font-family:'Noto Sans TC',sans-serif;font-size:16px;font-weight:500;
+    padding:14px 34px;border-radius:999px;cursor:pointer;transition:border-color .2s,background .2s;
+  }
+  .btn:hover{border-color:var(--ink);background:rgba(237,233,226,.06);}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+
+  /* ---- 比較畫面 ---- */
+  #quiz{position:relative;}
+  .progress{
+    position:absolute;top:24px;left:0;right:0;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    font-size:13px;color:var(--muted);z-index:5;
+    padding-top:env(safe-area-inset-top,0px);
+  }
+  .progress .track{width:140px;height:2px;background:var(--line);position:relative;}
+  .progress .track i{position:absolute;left:0;top:0;height:100%;background:var(--ink);transition:width .35s ease;}
+
+  .split{flex:1;display:flex;min-height:100vh;min-height:100dvh;}
+  @media (max-width:720px){.split{flex-direction:column;}}
+
+  .option{
+    flex:1;position:relative;display:flex;flex-direction:column;gap:10px;
+    align-items:center;justify-content:center;padding:12vh 7vw;cursor:pointer;
+    border:none;color:var(--ink);text-align:center;isolation:isolate;
+  }
+  .option::before{content:"";position:absolute;inset:0;background:var(--tint);opacity:0;transition:opacity .25s ease;z-index:-1;}
+  .option:hover::before,.option:focus-visible::before{opacity:.16;}
+  .option.left{--tint:var(--left);border-right:1px solid var(--line);}
+  .option.right{--tint:var(--right);}
+  @media (max-width:720px){.option.left{border-right:none;border-bottom:1px solid var(--line);}}
+  .option .name{font-family:'Noto Serif TC',serif;font-size:clamp(24px,3.6vw,38px);font-weight:700;line-height:1.4;}
+  .option.left .name{color:var(--left);}
+  .option.right .name{color:var(--right);}
+
+  .vs{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--bg);
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);
+    z-index:6;pointer-events:none;
+  }
+
+  /* ---- 晉級 / 結果畫面（共用） ---- */
+  #transition,#result{align-items:center;padding:9vh 6vw 8vh;text-align:center;gap:24px;}
+  #transition h2,#result h2{font-size:clamp(26px,4.6vw,40px);font-weight:900;margin:0;}
+  #transition p.sub,#result p.sub{color:var(--muted);font-size:14px;margin:0;}
+  #result-list,#finalist-list{width:100%;max-width:560px;text-align:left;display:flex;flex-direction:column;gap:8px;}
+  .row{
+    display:flex;align-items:baseline;gap:14px;padding:12px 16px;
+    border:1px solid var(--line);border-radius:10px;font-size:14px;
+  }
+  .row .rank{font-family:'Noto Serif TC',serif;font-weight:900;font-size:18px;color:var(--muted);width:2.4em;flex:none;}
+  .row .name{font-weight:700;}
+
+  details{width:100%;max-width:560px;text-align:left;color:var(--muted);font-size:13px;}
+  details summary{cursor:pointer;padding:10px 4px;}
+  .others{display:flex;flex-wrap:wrap;gap:8px;padding:10px 4px;}
+  .others span{border:1px solid var(--line);border-radius:8px;padding:6px 10px;}
+</style>
+</head>
+<body>
+
+<section id="start" class="screen active">
+  <div class="crack">共 <span id="total-count-1"></span> 位角色，選出你心中的前 8 名</div>
+  <h1>詭野西部第三季<br>角色殘酷二選一</h1>
+  <p>分成兩階段：先用<b style="color:var(--ink)">預賽</b>（<span id="prelim-count-1"></span> 題）從 <span id="total-count-2"></span> 位角色選出 8 強，<br>再用<b style="color:var(--ink)">複賽</b>（約 20 題）排出這 8 位的完整名次。<br>沒進入 8 強的角色不排序。</p>
+  <button class="btn" id="btn-start">開始預賽</button>
+</section>
+
+<section id="quiz" class="screen">
+  <div class="progress">
+    <span id="stage-label">預賽</span>
+    <span id="progress-text">第 1 題</span>
+    <div class="track"><i id="progress-bar" style="width:2%"></i></div>
+  </div>
+  <div class="split">
+    <button class="option left" id="opt-left">
+      <span class="name" id="opt-left-name"></span>
+    </button>
+    <div class="vs">或</div>
+    <button class="option right" id="opt-right">
+      <span class="name" id="opt-right-name"></span>
+    </button>
+  </div>
+</section>
+
+<section id="transition" class="screen">
+  <div class="crack">預賽結束</div>
+  <h2>這 8 位角色進入複賽</h2>
+  <p class="sub">接下來只排這 8 位的名次，其餘角色不再參與</p>
+  <div id="finalist-list"></div>
+  <button class="btn" id="btn-final">開始複賽</button>
+</section>
+
+<section id="result" class="screen">
+  <h2>這是複賽的最終順位</h2>
+  <p class="sub">預賽 <span id="prelim-count-2"></span> 題　複賽 <span id="final-count">0</span> 題</p>
+  <div id="result-list"></div>
+  <details>
+    <summary>其餘 <span id="others-count"></span> 位角色（不分名次）</summary>
+    <div class="others" id="others-list"></div>
+  </details>
+  <div class="btn-row">
+    <button class="btn" id="btn-copy">複製名次</button>
+    <button class="btn" id="btn-restart">重新排一次</button>
+  </div>
+</section>
+
+<script>
+// 角色清單
+const CHARACTERS = [
+  { name: "葛洛莉亞" },
+  { name: "卡達絲" },
+  { name: "薩爾索" },
+  { name: "希托拉" },
+  { name: "賽蓓爾" },
+  { name: "漢克" },
+  { name: "阿班登" },
+  { name: "艾德華" },
+  { name: "費里昂" },
+  { name: "安東尼" },
+  { name: "托嘉" },
+  { name: "哈魯瑪特" },
+  { name: "奧林" },
+  { name: "卡爾" },
+  { name: "愛坡倫" },
+  { name: "薇雅卡" },
+  { name: "洛多" },
+  { name: "凡妮絲" },
+  { name: "艾芙琳" },
+  { name: "伊恩" },
+  { name: "蘭格倫" },
+  { name: "齊德隆" },
+  { name: "安琪" },
+  { name: "提洛" },
+  { name: "加布" },
+  { name: "桔米" },
+  { name: "凱雅" },
+  { name: "伊塔畢" },
+  { name: "瑞尼克" },
+  { name: "薩羅伊" },
+  { name: "諾利" }
+];
+
+const FINALIST_COUNT = 8;
+const PRELIM_TOTAL = CHARACTERS.length - FINALIST_COUNT;
+const FINAL_ESTIMATE = Math.ceil(FINALIST_COUNT * Math.log2(FINALIST_COUNT)); // 約 24 題，用於進度條估算
+
+['total-count-1','total-count-2'].forEach(id => document.getElementById(id).textContent = CHARACTERS.length);
+['prelim-count-1','prelim-count-2'].forEach(id => document.getElementById(id).textContent = PRELIM_TOTAL);
+document.getElementById('others-count').textContent = CHARACTERS.length - FINALIST_COUNT;
+
+const screens = {
+  start: document.getElementById('start'),
+  quiz: document.getElementById('quiz'),
+  transition: document.getElementById('transition'),
+  result: document.getElementById('result')
+};
+function show(name){
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+}
+
+let finalCompareCount = 0;
+let finalists = [];
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function askUser(a, b, stageLabel, progressText, pct){
+  return new Promise(resolve => {
+    document.getElementById('stage-label').textContent = stageLabel;
+    document.getElementById('progress-text').textContent = progressText;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('opt-left-name').textContent = a.name;
+    document.getElementById('opt-right-name').textContent = b.name;
+
+    const left = document.getElementById('opt-left');
+    const right = document.getElementById('opt-right');
+    function onLeft(){ cleanup(); resolve(a); }
+    function onRight(){ cleanup(); resolve(b); }
+    function cleanup(){
+      left.removeEventListener('click', onLeft);
+      right.removeEventListener('click', onRight);
+    }
+    left.addEventListener('click', onLeft);
+    right.addEventListener('click', onRight);
+  });
+}
+
+// 預賽：排隊淘汰制，每次從隊伍最前面取兩位比較，贏者排到隊尾，輸者淘汰
+// 28 位剛好比 20 題就能縮減到 8 強
+async function runPrelim(pool){
+  const queue = pool.slice();
+  let count = 0;
+  while(queue.length > FINALIST_COUNT){
+    const a = queue.shift();
+    const b = queue.shift();
+    count++;
+    const winner = await askUser(a, b, '預賽', '第 ' + count + ' / ' + PRELIM_TOTAL + ' 題', count / PRELIM_TOTAL * 100);
+    queue.push(winner);
+  }
+  return queue;
+}
+
+// 複賽：合併排序，排出 8 強的完整名次
+async function mergeSort(arr){
+  if(arr.length <= 1) return arr;
+  const mid = arr.length >> 1;
+  const left = await mergeSort(arr.slice(0, mid));
+  const right = await mergeSort(arr.slice(mid));
+  return await merge(left, right);
+}
+async function merge(left, right){
+  const result = [];
+  let i = 0, j = 0;
+  while(i < left.length && j < right.length){
+    finalCompareCount++;
+    const pct = Math.min(finalCompareCount / FINAL_ESTIMATE, 0.97) * 100;
+    const winner = await askUser(left[i], right[j], '複賽', '第 ' + finalCompareCount + ' 題', pct);
+    if(winner === left[i]){ result.push(left[i]); i++; }
+    else { result.push(right[j]); j++; }
+  }
+  return result.concat(left.slice(i)).concat(right.slice(j));
+}
+
+function renderFinalists(list){
+  const box = document.getElementById('finalist-list');
+  box.innerHTML = '';
+  list.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<span class="name">${c.name}</span>`;
+    box.appendChild(row);
+  });
+  show('transition');
+}
+
+function renderResult(ranked){
+  document.getElementById('final-count').textContent = finalCompareCount;
+  const list = document.getElementById('result-list');
+  list.innerHTML = '';
+  ranked.forEach((c, i) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<span class="rank">${i+1}</span><span class="name">${c.name}</span>`;
+    list.appendChild(row);
+  });
+
+  const others = CHARACTERS.filter(c => !finalists.includes(c));
+  const othersBox = document.getElementById('others-list');
+  othersBox.innerHTML = '';
+  others.forEach(c => {
+    const span = document.createElement('span');
+    span.textContent = c.name;
+    othersBox.appendChild(span);
+  });
+
+  show('result');
+}
+
+async function startPrelim(){
+  finalCompareCount = 0;
+  show('quiz');
+  const shuffled = shuffle(CHARACTERS);
+  finalists = await runPrelim(shuffled);
+  renderFinalists(finalists);
+}
+
+async function startFinal(){
+  show('quiz');
+  const ranked = await mergeSort(shuffle(finalists));
+  renderResult(ranked);
+}
+
+document.getElementById('btn-start').addEventListener('click', startPrelim);
+document.getElementById('btn-final').addEventListener('click', startFinal);
+document.getElementById('btn-restart').addEventListener('click', () => show('start'));
+document.getElementById('btn-copy').addEventListener('click', () => {
+  const ranked = Array.from(document.querySelectorAll('#result-list .row')).map(row =>
+    row.querySelector('.rank').textContent + '. ' +
+    row.querySelector('.name').textContent
+  ).join('\n');
+  const btn = document.getElementById('btn-copy');
+  navigator.clipboard.writeText(ranked).then(() => {
+    const original = btn.textContent;
+    btn.textContent = '已複製';
+    setTimeout(() => btn.textContent = original, 1500);
+  }).catch(() => {
+    btn.textContent = '複製失敗，請手動選取';
+  });
+});
+</script>
+
+</body>
+</html>
